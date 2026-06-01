@@ -1,0 +1,10 @@
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+CH_API_KEY: str = os.environ.get("CH_API_KEY", "")
+OPENROUTER_API_KEY: str = os.environ.get("OPENROUTER_API_KEY", "")
+OPENROUTER_BASE_URL: str = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+LLM_MODEL: str = os.environ.get("LLM_MODEL", "anthropic/claude-sonnet-4-5")
