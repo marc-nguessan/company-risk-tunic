@@ -4,8 +4,13 @@ import type {
   CompanyQuery,
   CompanyRiskAssessment,
   EntityCandidate,
+  EntityResolvedEvent,
+  ErrorEvent,
+  FinalEvent,
+  NeedsDisambiguationEvent,
   ResolvedEntity,
   SourceResult,
+  SourceResultEvent,
 } from '../types';
 import { ssePost } from '../utils/ssePost';
 
@@ -119,27 +124,32 @@ export function useAssessment() {
 
     try {
       const stream = ssePost<AssessmentEvent>('/assess', query, controller.signal);
-      for await (const { data } of stream) {
-        switch (data.type) {
+      // Route on the SSE `event:` field — the canonical key in the wire format.
+      // `data` carries the typed JSON payload for each event.
+      for await (const { event, data } of stream) {
+        switch (event) {
           case 'entity_resolved':
-            dispatch({ type: 'ENTITY_RESOLVED', entity: data.entity });
+            dispatch({ type: 'ENTITY_RESOLVED', entity: (data as EntityResolvedEvent).entity });
             break;
           case 'source_result':
-            dispatch({ type: 'SOURCE_RESULT', result: data.result });
+            dispatch({ type: 'SOURCE_RESULT', result: (data as SourceResultEvent).result });
             break;
           case 'final':
-            dispatch({ type: 'FINAL', assessment: data.assessment });
+            dispatch({ type: 'FINAL', assessment: (data as FinalEvent).assessment });
             break;
           case 'needs_disambiguation':
-            dispatch({ type: 'NEEDS_DISAMBIGUATION', candidates: data.candidates });
+            dispatch({ type: 'NEEDS_DISAMBIGUATION', candidates: (data as NeedsDisambiguationEvent).candidates });
             break;
           case 'error':
-            dispatch({ type: 'ERROR', message: data.message });
+            dispatch({ type: 'ERROR', message: (data as ErrorEvent).message });
             break;
+          default:
+            console.error('[useAssessment] Unknown SSE event type:', event, data);
         }
       }
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
+        console.error('[useAssessment] Stream error:', err);
         dispatch({ type: 'ERROR', message: err.message });
       }
     }
