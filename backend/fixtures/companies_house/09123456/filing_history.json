@@ -1,0 +1,40 @@
+{
+  "filing_history_status": "filing-history-available",
+  "items": [
+    {
+      "category": "dissolution",
+      "date": "2022-08-30",
+      "description": "gazette-notice-compulsory",
+      "pages": 1,
+      "transaction_id": "MzA5MTIzNDU2YWRpcXprY3g",
+      "type": "GAZ2"
+    },
+    {
+      "category": "confirmation-statement",
+      "date": "2021-04-20",
+      "description": "confirmation-statement",
+      "pages": 5,
+      "transaction_id": "MzA4MTIzNDU2YWRpcXprY3g",
+      "type": "CS01"
+    },
+    {
+      "category": "accounts",
+      "date": "2021-01-28",
+      "description": "total-exemption-full",
+      "pages": 7,
+      "transaction_id": "MzA3MTIzNDU2YWRpcXprY3g",
+      "type": "AA"
+    },
+    {
+      "category": "confirmation-statement",
+      "date": "2020-04-16",
+      "description": "confirmation-statement",
+      "pages": 5,
+      "transaction_id": "MzA2MTIzNDU2YWRpcXprY3g",
+      "type": "CS01"
+    }
+  ],
+  "items_per_page": 25,
+  "start_index": 0,
+  "total_count": 4
+}

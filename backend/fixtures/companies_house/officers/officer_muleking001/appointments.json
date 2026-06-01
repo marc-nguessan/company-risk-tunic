@@ -1,0 +1,117 @@
+{
+  "is_corporate_officer": false,
+  "kind": "personal-appointment",
+  "name": "MULEKING, James Robert",
+  "total_results": 20,
+  "items_per_page": 35,
+  "start_index": 0,
+  "links": {
+    "self": "/officers/officer_muleking001/appointments"
+  },
+  "items": [
+    {
+      "appointed_on": "2026-03-10",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "NEWCO DIGITAL LTD", "company_number": "14999001", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2024-11-01",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "RAPID TRADE CO LTD", "company_number": "15100001", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2024-09-15",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "SWIFT PAY SOLUTIONS LTD", "company_number": "15200002", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2024-07-03",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "GLOBAL FUNDS MANAGEMENT LTD", "company_number": "15300003", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2024-05-22",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "BLUE HORIZON VENTURES LTD", "company_number": "15400004", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2024-03-11",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "APEX CAPITAL SERVICES LTD", "company_number": "15500005", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2024-01-08",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "MERIDIAN ASSET TRADING LTD", "company_number": "15600006", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2023-11-19",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "ZENITH MONEY BROKERS LTD", "company_number": "15700007", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2023-09-04",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "DELTA PAYMENT SERVICES LTD", "company_number": "15800008", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2023-07-27",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "SIGMA FINANCE GROUP LTD", "company_number": "15900009", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2023-05-14",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "OMEGA REMITTANCE LTD", "company_number": "16000010", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2023-03-01",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "NOVA FINANCIAL CONSULTING LTD", "company_number": "16100011", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-12-12",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "ALPHA TRANSFERS LTD", "company_number": "16200012", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-10-05",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "BETA EXCHANGE HOUSE LTD", "company_number": "16300013", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-08-18",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "GAMMA INVESTMENT VEHICLES LTD", "company_number": "16400014", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-06-09",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "THETA CRYPTO ADVISORY LTD", "company_number": "16500015", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-11-23",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "KAPPA HOLDINGS LTD", "company_number": "16600016", "company_status": "dissolved"},
+      "resigned_on": null
+    },
+    {
+      "appointed_on": "2021-08-04",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "LAMBDA ASSET SERVICES LTD", "company_number": "16700017", "company_status": "dissolved"},
+      "resigned_on": null
+    },
+    {
+      "appointed_on": "2021-04-15",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "MU FINANCE LTD", "company_number": "16800018", "company_status": "dissolved"},
+      "resigned_on": null
+    },
+    {
+      "appointed_on": "2020-09-01",
+      "officer_role": "director",
+      "resigned_on": "2022-03-31",
+      "appointed_to": {"company_name": "OLD COMPANY LTD", "company_number": "16900019", "company_status": "active"}
+    }
+  ]
+}

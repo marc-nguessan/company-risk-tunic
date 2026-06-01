@@ -1,0 +1,40 @@
+{
+  "filing_history_status": "filing-history-available",
+  "items": [
+    {
+      "category": "confirmation-statement",
+      "date": "2025-06-20",
+      "description": "confirmation-statement",
+      "pages": 5,
+      "transaction_id": "MzBTQzk4NzY1NGFkaXF6a2N4",
+      "type": "CS01"
+    },
+    {
+      "category": "accounts",
+      "date": "2025-03-28",
+      "description": "total-exemption-full",
+      "pages": 9,
+      "transaction_id": "MzFTQzk4NzY1NGFkaXF6a2N4",
+      "type": "AA"
+    },
+    {
+      "category": "confirmation-statement",
+      "date": "2024-06-18",
+      "description": "confirmation-statement",
+      "pages": 5,
+      "transaction_id": "MzJTQzk4NzY1NGFkaXF6a2N4",
+      "type": "CS01"
+    },
+    {
+      "category": "accounts",
+      "date": "2024-03-25",
+      "description": "total-exemption-full",
+      "pages": 9,
+      "transaction_id": "MzNTQzk4NzY1NGFkaXF6a2N4",
+      "type": "AA"
+    }
+  ],
+  "items_per_page": 25,
+  "start_index": 0,
+  "total_count": 4
+}

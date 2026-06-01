@@ -1,0 +1,192 @@
+{
+  "is_corporate_officer": false,
+  "kind": "personal-appointment",
+  "name": "SUPERMULE, Victor Anton",
+  "total_results": 35,
+  "items_per_page": 35,
+  "start_index": 0,
+  "links": {
+    "self": "/officers/officer_supermule001/appointments"
+  },
+  "items": [
+    {
+      "appointed_on": "2019-06-15",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "MULE NETWORK CONSULTING LTD", "company_number": "SC987654", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-01-08",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "PHANTOM RECEIPTS LTD", "company_number": "20000001", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-02-14",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "GHOST ACCOUNTS LTD", "company_number": "20000002", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-03-22",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "SHADOW BANKING LTD", "company_number": "20000003", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-04-30",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "MIRAGE INVESTMENTS LTD", "company_number": "20000004", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-06-05",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "SPECTRE CAPITAL LTD", "company_number": "20000005", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-07-11",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "ECLIPSE FINANCIAL LTD", "company_number": "20000006", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-08-19",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "NEBULA PAYMENTS LTD", "company_number": "20000007", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-09-25",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "VORTEX MONEY LTD", "company_number": "20000008", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-10-31",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "COMET TRADING LTD", "company_number": "20000009", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-12-07",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "PULSAR REMITTANCE LTD", "company_number": "20000010", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-01-13",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "QUASAR EXCHANGE LTD", "company_number": "20000011", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-02-20",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "AURORA ASSET MANAGEMENT LTD", "company_number": "20000012", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-03-28",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "ZENON TRANSFERS LTD", "company_number": "20000013", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-05-04",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "ION CURRENCY BROKERS LTD", "company_number": "20000014", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-06-10",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "PROTON FINANCE LTD", "company_number": "20000015", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-07-16",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "ELECTRON HOLDINGS LTD", "company_number": "20000016", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-08-22",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "NEUTRON CAPITAL LTD", "company_number": "20000017", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-09-29",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "PHOTON INVESTMENTS LTD", "company_number": "20000018", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-11-04",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "MUON ASSET TRADING LTD", "company_number": "20000019", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-12-11",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "GLUON FINANCIAL SERVICES LTD", "company_number": "20000020", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-01-17",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "TACHYON MONEY TRANSFERS LTD", "company_number": "20000021", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-02-23",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "BOSON PAYMENT GATEWAY LTD", "company_number": "20000022", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-04-01",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "FERMION EXCHANGE LTD", "company_number": "20000023", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-05-08",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "HADRON BROKERS LTD", "company_number": "20000024", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-06-14",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "LEPTON CAPITAL GROUP LTD", "company_number": "20000025", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-07-20",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "BARYON INVESTMENTS LTD", "company_number": "20000026", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-08-26",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "MESON ASSET VEHICLES LTD", "company_number": "20000027", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-10-01",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "PION PAYMENT SOLUTIONS LTD", "company_number": "20000028", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2022-11-07",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "KAON TRADING HOUSE LTD", "company_number": "20000029", "company_status": "dissolved"},
+      "resigned_on": null
+    },
+    {
+      "appointed_on": "2022-12-13",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "ETA PRIME HOLDINGS LTD", "company_number": "20000030", "company_status": "dissolved"},
+      "resigned_on": null
+    },
+    {
+      "appointed_on": "2023-01-19",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "LAMBDA PRIME FINANCE LTD", "company_number": "20000031", "company_status": "dissolved"},
+      "resigned_on": null
+    },
+    {
+      "appointed_on": "2023-02-25",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "NU WAVE PAYMENTS LTD", "company_number": "20000032", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2023-04-02",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "XI ASSET MANAGEMENT LTD", "company_number": "20000033", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2019-09-01",
+      "officer_role": "director",
+      "resigned_on": "2021-03-15",
+      "appointed_to": {"company_name": "OLD SERVICES LTD", "company_number": "20000034", "company_status": "active"}
+    }
+  ]
+}

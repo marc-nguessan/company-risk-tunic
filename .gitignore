@@ -16,3 +16,5 @@ frontend/dist/
 
 # OS
 .DS_Store
+KICKOFF_PROMPT.md
+CLAUDE.md

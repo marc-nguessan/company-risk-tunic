@@ -1,0 +1,47 @@
+{
+  "company_name": "MULE NETWORK CONSULTING LTD",
+  "company_number": "SC987654",
+  "company_status": "active",
+  "company_status_detail": null,
+  "type": "ltd",
+  "date_of_creation": "2019-06-15",
+  "jurisdiction": "scotland",
+  "registered_office_address": {
+    "address_line_1": "Suite 12, Thistle Business Centre",
+    "address_line_2": "Castle Street",
+    "locality": "Edinburgh",
+    "postal_code": "EH2 3AH",
+    "country": "Scotland"
+  },
+  "accounts": {
+    "accounting_reference_date": {
+      "day": "30",
+      "month": "06"
+    },
+    "last_accounts": {
+      "made_up_to": "2024-06-30",
+      "type": "total-exemption-full",
+      "period_start_on": "2023-07-01",
+      "period_end_on": "2024-06-30"
+    },
+    "next_accounts": {
+      "due_on": "2026-03-31",
+      "overdue": false,
+      "period_start_on": "2024-07-01",
+      "period_end_on": "2025-06-30"
+    },
+    "next_due": "2026-03-31"
+  },
+  "confirmation_statement": {
+    "last_made_up_to": "2025-06-14",
+    "next_due": "2026-06-28",
+    "next_made_up_to": "2026-06-14",
+    "overdue": false
+  },
+  "sic_codes": ["70229"],
+  "links": {
+    "self": "/company/SC987654",
+    "filing_history": "/company/SC987654/filing-history",
+    "officers": "/company/SC987654/officers"
+  }
+}

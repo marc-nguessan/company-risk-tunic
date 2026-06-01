@@ -1,0 +1,38 @@
+{
+  "is_corporate_officer": false,
+  "kind": "personal-appointment",
+  "name": "NORMAL, Sarah Elizabeth",
+  "total_results": 5,
+  "items_per_page": 35,
+  "start_index": 0,
+  "links": {
+    "self": "/officers/officer_normal001/appointments"
+  },
+  "items": [
+    {
+      "appointed_on": "2026-03-10",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "NEWCO DIGITAL LTD", "company_number": "14999001", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2023-05-01",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "SIDELINE VENTURES LTD", "company_number": "13500001", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2021-09-14",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "HOBBY PROJECTS LTD", "company_number": "12200002", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2020-02-28",
+      "officer_role": "secretary",
+      "appointed_to": {"company_name": "SMALL SERVICES LTD", "company_number": "11100003", "company_status": "active"}
+    },
+    {
+      "appointed_on": "2018-06-01",
+      "officer_role": "director",
+      "appointed_to": {"company_name": "FAMILY BUSINESS LTD", "company_number": "10000004", "company_status": "active"}
+    }
+  ]
+}

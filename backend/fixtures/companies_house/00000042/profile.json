@@ -1,0 +1,46 @@
+{
+  "company_name": "HOPEFUL COMMUNITIES CHARITABLE FOUNDATION",
+  "company_number": "00000042",
+  "company_status": "active",
+  "company_status_detail": null,
+  "type": "charitable-incorporated-organisation",
+  "date_of_creation": "",
+  "jurisdiction": "england-wales",
+  "registered_office_address": {
+    "address_line_1": "Community Hall, Church Lane",
+    "locality": "Bristol",
+    "postal_code": "BS1 5UJ",
+    "country": "England"
+  },
+  "accounts": {
+    "accounting_reference_date": {
+      "day": "31",
+      "month": "12"
+    },
+    "last_accounts": {
+      "made_up_to": "2024-12-31",
+      "type": "small",
+      "period_start_on": "2024-01-01",
+      "period_end_on": "2024-12-31"
+    },
+    "next_accounts": {
+      "due_on": "2026-09-30",
+      "overdue": false,
+      "period_start_on": "2025-01-01",
+      "period_end_on": "2025-12-31"
+    },
+    "next_due": "2026-09-30"
+  },
+  "confirmation_statement": {
+    "last_made_up_to": "2024-12-31",
+    "next_due": "2026-01-14",
+    "next_made_up_to": "2025-12-31",
+    "overdue": false
+  },
+  "sic_codes": ["94990"],
+  "links": {
+    "self": "/company/00000042",
+    "filing_history": "/company/00000042/filing-history",
+    "officers": "/company/00000042/officers"
+  }
+}

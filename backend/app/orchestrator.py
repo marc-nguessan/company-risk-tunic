@@ -1,8 +1,7 @@
 """
-Orchestrator: fan-out to sources, stream events via async generator.
+Orchestrator: resolve entity → fan-out sources → stream events → final assessment.
 
-Phase 1: entity resolution is stubbed (no real CH lookup yet).
-Phase 2: replace _resolve_entity() with real Companies House search.
+Adding a source: one new class + one registry entry in _SOURCES. That's it.
 """
 
 import asyncio
@@ -10,48 +9,35 @@ from collections.abc import AsyncIterator
 from datetime import datetime, timezone
 from typing import cast
 
+from app import entity_resolution
 from app.models import (
     AssessmentEvent,
     CompanyQuery,
     CompanyRiskAssessment,
     EntityResolvedEvent,
+    ErrorEvent,
     FinalEvent,
-    ResolvedEntity,
+    NeedsDisambiguationEvent,
     SourceResult,
     SourceResultEvent,
 )
 from app.scoring import aggregate_and_score
+from app.sources.adverse_media import AdverseMediaSource
 from app.sources.base import DataSource
+from app.sources.companies_house import CompaniesHouseSource
+from app.sources.director_network import DirectorNetworkSource
 
 # ---------------------------------------------------------------------------
-# Source registry — adding a source is one class + one entry here
+# Source registry
 # ---------------------------------------------------------------------------
-
-from app.sources.stub_companies_info import StubCompaniesInfoSource
-from app.sources.stub_director_network import StubDirectorNetworkSource
 
 _SOURCES: list[DataSource] = [
-    StubCompaniesInfoSource(),
-    StubDirectorNetworkSource(),
+    CompaniesHouseSource(),
+    DirectorNetworkSource(),
+    AdverseMediaSource(),
 ]
 
-PROMPT_VERSION = "stub_v1"
-
-
-# ---------------------------------------------------------------------------
-# Stub entity resolution (Phase 1)
-# ---------------------------------------------------------------------------
-
-
-def _stub_resolve(query: CompanyQuery) -> ResolvedEntity:
-    """Return a synthetic entity so the stream works before real CH is wired."""
-    return ResolvedEntity(
-        registration_number=query.registration_number or "00000000",
-        name=query.company_name or f"Company {query.registration_number}",
-        status="active",
-        match_confidence=1.0,
-        address=None,
-    )
+PROMPT_VERSION = "phase2_v1"
 
 
 # ---------------------------------------------------------------------------
@@ -60,13 +46,22 @@ def _stub_resolve(query: CompanyQuery) -> ResolvedEntity:
 
 
 def _compute_completeness(results: list[SourceResult]) -> float:
-    ok_count = sum(1 for r in results if r.status in ("ok", "partial"))
-    return round(ok_count / len(results), 2) if results else 0.0
+    if not results:
+        return 0.0
+    ok = sum(1 for r in results if r.status in ("ok", "partial"))
+    return round(ok / len(results), 2)
 
 
 def _compute_confidence(results: list[SourceResult]) -> float:
-    ok_count = sum(1 for r in results if r.status == "ok")
-    return round(ok_count / len(results), 2) if results else 0.0
+    """
+    Confidence is derived from source health, NOT from the risk score.
+    'Low risk' and 'we couldn't find enough to tell' are different outcomes —
+    a fraud analyst needs to see which one they're looking at.
+    """
+    if not results:
+        return 0.0
+    ok = sum(1 for r in results if r.status == "ok")
+    return round(ok / len(results), 2)
 
 
 # ---------------------------------------------------------------------------
@@ -75,11 +70,19 @@ def _compute_confidence(results: list[SourceResult]) -> float:
 
 
 async def assess(query: CompanyQuery) -> AsyncIterator[AssessmentEvent]:
-    # Phase 1: resolve entity without real API call.
-    entity = _stub_resolve(query)
+    # Step 1: entity resolution.
+    entity, candidates = await entity_resolution.resolve_entity(query)
+
+    if entity is None:
+        if candidates:
+            yield NeedsDisambiguationEvent(candidates=candidates)
+        else:
+            yield ErrorEvent(message="No matching company found.")
+        return
+
     yield EntityResolvedEvent(entity=entity)
 
-    # Fan-out: launch all sources concurrently; yield each result as it lands.
+    # Step 2: fan-out — launch all sources concurrently; yield each result as it lands.
     results: list[SourceResult] = []
     tasks = {asyncio.ensure_future(src.safe_fetch(entity)): src for src in _SOURCES}
 
@@ -91,14 +94,14 @@ async def assess(query: CompanyQuery) -> AsyncIterator[AssessmentEvent]:
             results.append(result)
             yield SourceResultEvent(result=result)
 
-    # Aggregate deterministically.
+    # Step 3: deterministic aggregate.
     all_signals = [sig for r in results for sig in r.signals]
     score, band = aggregate_and_score(all_signals)
 
     assessment = CompanyRiskAssessment(
         query=query,
         resolved_entity=entity,
-        candidates=[],
+        candidates=candidates,
         overall_risk_score=score,
         risk_band=band,
         sources=results,

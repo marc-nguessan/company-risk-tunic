@@ -1,0 +1,25 @@
+{
+  "is_corporate_officer": false,
+  "kind": "personal-appointment",
+  "name": "DISSOLVED, Robert Charles",
+  "total_results": 2,
+  "items_per_page": 35,
+  "start_index": 0,
+  "links": {
+    "self": "/officers/officer_dissolved001/appointments"
+  },
+  "items": [
+    {
+      "appointed_on": "2018-04-15",
+      "officer_role": "director",
+      "resigned_on": "2022-08-30",
+      "appointed_to": {"company_name": "DISSOLVED VENTURES LTD", "company_number": "09123456", "company_status": "dissolved"}
+    },
+    {
+      "appointed_on": "2015-01-01",
+      "officer_role": "director",
+      "resigned_on": "2019-06-30",
+      "appointed_to": {"company_name": "PRIOR FIRM LTD", "company_number": "08800001", "company_status": "dissolved"}
+    }
+  ]
+}

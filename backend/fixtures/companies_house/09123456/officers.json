@@ -1,0 +1,27 @@
+{
+  "active_count": 0,
+  "inactive_count": 0,
+  "resigned_count": 1,
+  "kind": "officer-list",
+  "total_results": 1,
+  "items": [
+    {
+      "name": "DISSOLVED, Robert Charles",
+      "officer_role": "director",
+      "appointed_on": "2018-04-15",
+      "resigned_on": "2022-08-30",
+      "nationality": "British",
+      "occupation": "Businessman",
+      "date_of_birth": {
+        "month": 11,
+        "year": 1965
+      },
+      "links": {
+        "officer": {
+          "appointments": "/officers/officer_dissolved001/appointments"
+        },
+        "self": "/company/09123456/appointments/officer_dissolved001"
+      }
+    }
+  ]
+}

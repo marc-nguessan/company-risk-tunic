@@ -1,0 +1,35 @@
+{
+  "active_count": 2,
+  "inactive_count": 0,
+  "resigned_count": 0,
+  "kind": "officer-list",
+  "total_results": 2,
+  "items": [
+    {
+      "name": "CHARITY, William Peter",
+      "officer_role": "cio-chair",
+      "appointed_on": "2019-03-01",
+      "nationality": "British",
+      "occupation": "Retired",
+      "links": {
+        "officer": {
+          "appointments": "/officers/officer_normal001/appointments"
+        },
+        "self": "/company/00000042/appointments/officer_normal001"
+      }
+    },
+    {
+      "name": "GOODWILL, Margaret",
+      "officer_role": "cio-member",
+      "appointed_on": "2019-03-01",
+      "nationality": "British",
+      "occupation": "Teacher",
+      "links": {
+        "officer": {
+          "appointments": "/officers/officer_normal001/appointments"
+        },
+        "self": "/company/00000042/appointments/officer_normal001b"
+      }
+    }
+  ]
+}
