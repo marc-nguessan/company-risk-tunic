@@ -1,0 +1,12 @@
+Company under assessment: {company_name} (Companies House registration number: {registration_number})
+
+Source document label: {source_label}
+
+Article text:
+"""
+{article_text}
+"""
+
+Task: Classify whether the article above contains adverse media about {company_name} (registration number {registration_number}).
+
+Recall the rules: if the company in the article is a different legal entity than {company_name} ({registration_number}), classify NOT_ADVERSE. If the article describes {company_name} as the victim of wrongdoing rather than the perpetrator, classify NOT_ADVERSE. When uncertain, classify NOT_ADVERSE with severity info.

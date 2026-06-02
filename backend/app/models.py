@@ -122,3 +122,27 @@ AssessmentEvent = (
     | NeedsDisambiguationEvent
     | ErrorEvent
 )
+
+
+# ---------------------------------------------------------------------------
+# LLM output contract — used by AdverseMediaSource
+# Schema is generated from THIS model via model_json_schema() so the
+# response_format sent to OpenRouter and the Pydantic validator are always
+# in sync and can never drift.
+# ---------------------------------------------------------------------------
+
+
+class AdverseMediaFinding(BaseModel):
+    is_adverse: bool
+    category: Literal[
+        "FRAUD_OR_SCAM",
+        "MONEY_LAUNDERING",
+        "SANCTIONS",
+        "BRIBERY_CORRUPTION",
+        "REGULATORY_ACTION",
+        "INSOLVENCY_MISCONDUCT",
+        "OTHER_ADVERSE",
+        "NOT_ADVERSE",
+    ]
+    severity: Literal["info", "low", "medium", "high"]
+    summary: str

@@ -1,0 +1,13 @@
+VICTIM: Edinburgh Consultancy Loses £12,500 in Supplier Impersonation Attack
+
+17 January 2026 | Scotsman Business
+
+MULE NETWORK CONSULTING LTD, the Edinburgh-based management consultancy registered at Companies House under number SC987654, has confirmed that it fell victim to a sophisticated invoice fraud in December 2025.
+
+Criminals posing as the firm's long-standing IT infrastructure supplier sent a convincingly formatted email — complete with forged company letterhead and a spoofed sender domain — notifying MULE NETWORK CONSULTING LTD's accounts department of a change in banking details on a pending invoice. The accounts team processed a scheduled payment of £12,500 to the fraudulent account before the deception was identified the following week, when the genuine supplier contacted the firm to enquire about the outstanding payment.
+
+"We were clearly the targets of a sophisticated fraud. Our staff acted in good faith on what appeared to be a routine change notification," said director Victor Supermule. "We have since implemented enhanced verification procedures, including mandatory telephone callbacks to pre-registered supplier numbers before processing any changes to bank account details."
+
+MULE NETWORK CONSULTING LTD reported the incident immediately to Police Scotland and Action Fraud, and has cooperated fully with their ongoing investigation into the perpetrators. The £12,500 loss has been reported to the company's business insurer.
+
+The incident is consistent with a broader pattern of so-called "mandate fraud" or "business email compromise" attacks targeting professional services firms in Scotland. Action Fraud recorded more than 8,400 similar reports in 2025, with total losses exceeding £137 million.
