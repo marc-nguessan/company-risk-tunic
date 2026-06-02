@@ -366,7 +366,7 @@ we didn't have a full data picture to work from.
 ## Project layout
 
 ```
-├── README.md / CLAUDE.md / .env.example
+├── README.md / .env.example
 ├── backend/
 │   ├── app/
 │   │   ├── main.py              # FastAPI app, POST /assess SSE endpoint
