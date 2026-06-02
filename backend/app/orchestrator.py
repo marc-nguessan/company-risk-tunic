@@ -37,7 +37,7 @@ _SOURCES: list[DataSource] = [
     AdverseMediaSource(),
 ]
 
-PROMPT_VERSION = "phase2_v1"
+PROMPT_VERSION = "adverse_media_v1"
 
 
 # ---------------------------------------------------------------------------

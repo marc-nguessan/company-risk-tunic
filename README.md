@@ -197,10 +197,12 @@ documented response shapes and recording real responses where possible.
 
 **SSE over WebSockets.**
 The interaction is strictly one-directional server-push for the duration of an assessment, so
-Server-Sent Events fit exactly: simpler than WebSockets, work over plain HTTP, auto-reconnect, no
-extra protocol. *Trade-off:* no client→server channel mid-stream (not needed here) and a browser
+Server-Sent Events fit exactly: simpler than WebSockets, work over plain HTTP, no extra protocol.
+*Trade-off:* no client→server channel mid-stream (not needed here) and a browser
 6-connections-per-host limit (irrelevant for one assessment at a time). One wrinkle: `EventSource` is
-GET-only, so the client uses `fetch` + a `ReadableStream` reader to POST and parse the stream itself.
+GET-only, so the client uses `fetch` + a `ReadableStream` reader to POST and parse the stream itself —
+which also trades away `EventSource`'s native auto-reconnect (an assessment is a one-shot stream, so
+this doesn't matter here).
 
 ---
 
@@ -350,7 +352,7 @@ single-node version of this; Redis is the multi-node generalisation.
   "completeness": 0.67,
   "confidence": 1.0,
   "generated_at": "2026-06-02T11:08:55.270280Z",
-  "prompt_version": "phase2_v1"
+  "prompt_version": "adverse_media_v1"
 }
 ```
 
