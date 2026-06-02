@@ -21,7 +21,7 @@ from app.models import (
     SourceResult,
     SourceResultEvent,
 )
-from app.scoring import aggregate_and_score
+from app.scoring import aggregate_and_score, compute_completeness
 from app.sources.adverse_media import AdverseMediaSource
 from app.sources.base import DataSource
 from app.sources.companies_house import CompaniesHouseSource
@@ -43,13 +43,6 @@ PROMPT_VERSION = "phase2_v1"
 # ---------------------------------------------------------------------------
 # Scoring helpers
 # ---------------------------------------------------------------------------
-
-
-def _compute_completeness(results: list[SourceResult]) -> float:
-    if not results:
-        return 0.0
-    ok = sum(1 for r in results if r.status in ("ok", "partial"))
-    return round(ok / len(results), 2)
 
 
 def _compute_confidence(results: list[SourceResult]) -> float:
@@ -105,7 +98,7 @@ async def assess(query: CompanyQuery) -> AsyncIterator[AssessmentEvent]:
         overall_risk_score=score,
         risk_band=band,
         sources=results,
-        completeness=_compute_completeness(results),
+        completeness=compute_completeness(results),
         confidence=_compute_confidence(results),
         generated_at=datetime.now(timezone.utc),
         prompt_version=PROMPT_VERSION,
