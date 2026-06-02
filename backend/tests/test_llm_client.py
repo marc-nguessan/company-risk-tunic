@@ -150,10 +150,10 @@ async def test_valid_first_response_no_retry():
 
 async def test_cache_prevents_second_llm_call():
     """
-    Identical (model, prompt_version, article_text) hit the cache on the second
-    call. Expects _call_llm called only once across two invocations.
+    Same (model, prompt_version, registration_number, article_text) → cache hit on
+    the second call. _call_llm must be invoked only once across both invocations.
     """
-    article_text = "Unique stable text for cache test — must not vary between calls."
+    article_text = "Unique stable text for same-company cache test."
 
     with (
         patch(_PATCH_LOAD, return_value="mock prompt text"),
@@ -168,7 +168,7 @@ async def test_cache_prevents_second_llm_call():
             source_label="cache_article",
             article_text=article_text,
         )
-        # Second call — same article_text should hit cache.
+        # Second call — identical registration_number + article_text → cache hit.
         finding2 = await classify_adverse_media(
             company_name="CACHE CO LTD",
             registration_number="44444444",
@@ -178,6 +178,48 @@ async def test_cache_prevents_second_llm_call():
 
     assert finding1.is_adverse == finding2.is_adverse
     assert mock_call.call_count == 1
+
+
+async def test_different_registration_numbers_do_not_collide():
+    """
+    Same article text, different registration numbers → two distinct cache keys →
+    two separate LLM calls, never a cached collision.
+
+    Motivation: the same-name fixture shows that identical article text can produce
+    different findings for different companies (adverse for the Frankfurt GmbH,
+    NOT_ADVERSE for SC987654). Without registration_number in the key, the second
+    company would silently receive the first company's cached classification.
+    """
+    article_text = "Shared article text that could be assessed for multiple companies."
+
+    with (
+        patch(_PATCH_LOAD, return_value="mock prompt text"),
+        patch(_PATCH_CLIENT, return_value=MagicMock()),
+        patch(_PATCH_CALL, new_callable=AsyncMock) as mock_call,
+    ):
+        # Simulate: first company finds the article adverse, second does not.
+        mock_call.side_effect = [
+            json.dumps(_VALID_PAYLOAD),       # company A → ADVERSE
+            json.dumps(_NOT_ADVERSE_PAYLOAD), # company B → NOT_ADVERSE (same article!)
+        ]
+
+        finding_a = await classify_adverse_media(
+            company_name="COMPANY A LTD",
+            registration_number="66666666",   # different registration number
+            source_label="shared_article",
+            article_text=article_text,
+        )
+        finding_b = await classify_adverse_media(
+            company_name="COMPANY B LTD",
+            registration_number="77777777",   # different registration number
+            source_label="shared_article",
+            article_text=article_text,
+        )
+
+    # Each company must produce its own LLM call — no cross-company cache hit.
+    assert mock_call.call_count == 2
+    assert finding_a.is_adverse is True
+    assert finding_b.is_adverse is False
 
 
 async def test_not_adverse_finding_is_valid():

@@ -103,9 +103,16 @@ def _strip_fences(text: str) -> str:
     return text.strip()
 
 
-def _cache_key(model: str, prompt_version: str, text: str) -> str:
-    """Deterministic cache key — identical inputs always map to the same key."""
-    payload = f"{model}:{prompt_version}:{text}"
+def _cache_key(model: str, prompt_version: str, registration_number: str, text: str) -> str:
+    """Deterministic cache key — identical inputs always map to the same key.
+
+    registration_number is included because the same article text assessed against
+    two different companies produces different prompts and can produce different
+    findings (e.g. the same-name fixture: adverse for the Frankfurt GmbH, NOT_ADVERSE
+    for SC987654).  Omitting it would allow a cache hit to silently return the wrong
+    company's classification.
+    """
+    payload = f"{model}:{prompt_version}:{registration_number}:{text}"
     return hashlib.sha256(payload.encode()).hexdigest()
 
 
@@ -180,7 +187,7 @@ async def classify_adverse_media(
     # Import here to keep the circular-import surface minimal.
     from app.models import AdverseMediaFinding
 
-    key = _cache_key(config.LLM_MODEL, prompt_version, article_text)
+    key = _cache_key(config.LLM_MODEL, prompt_version, registration_number, article_text)
     if key in _cache:
         _LOG.debug("Cache hit: %s / %s", registration_number, source_label)
         return _cache[key]  # type: ignore[return-value]
