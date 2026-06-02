@@ -1,0 +1,16 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #f4f4f5;
+  color: #1a1a1a;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spinning { display: inline-block; animation: spin 0.9s linear infinite; }
+
+button { font-family: inherit; }
+code   { font-family: 'Menlo', 'Consolas', monospace; }
