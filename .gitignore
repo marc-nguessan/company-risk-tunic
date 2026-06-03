@@ -19,3 +19,6 @@ frontend/dist/
 KICKOFF_PROMPT.md
 CLAUDE.md
 .notes
+
+# Old build scaffolding (kept on disk, not tracked)
+_Old/
