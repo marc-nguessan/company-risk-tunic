@@ -1,58 +1,86 @@
 # Company Risk Assessment
 
-> Prototype that gathers and structures information about a company so it can be risk-assessed as a
-> **payment beneficiary** — the recipient of a payment. Built for the Tunic Pay take-home exercise.
+Checks how risky a company is to **receive a payment** — useful for spotting scams where someone is
+tricked into paying a fraudulent business. You enter a company name or number; the tool gathers data
+from several sources, scores the risk, and shows the result live as each source reports back.
 
-A beneficiary is riskier if it was incorporated recently / files sparsely, has directors who sit on
-many other companies (a mule-network signal), or appears in scam reports or adverse media. This tool
-fans out to independent data sources, normalises everything into a single risk model, and streams the
-result to the UI as each source lands.
+A company looks riskier if it was set up very recently, barely files its paperwork, shares a director
+with many other companies (a money-mule pattern), or shows up in news about fraud or regulatory action.
 
 ---
 
-## 1. What it does & how to run it
+## Project layout
 
-Enter a company name or Companies House registration number. The backend resolves the entity, fans
-out to three data sources in parallel, streams each source's result over SSE as it completes, and
-finishes with a deterministic risk score, band, confidence, and completeness.
+```
+├── README.md / .env.example
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI app, POST /assess streaming endpoint
+│   │   ├── models.py            # Pydantic data shapes shared everywhere
+│   │   ├── orchestrator.py      # resolve company → run sources → stream → score
+│   │   ├── scoring.py           # the risk score (plain code, no LLM)
+│   │   ├── entity_resolution.py # turn a name/number into one company
+│   │   ├── config.py            # all settings, read from environment
+│   │   ├── llm/
+│   │   │   ├── client.py        # OpenRouter wrapper: strict JSON, retry, cache
+│   │   │   └── prompts/         # prompt text files, versioned by name
+│   │   └── sources/
+│   │       ├── base.py          # DataSource base class + safe_fetch
+│   │       ├── companies_house.py
+│   │       ├── director_network.py
+│   │       └── adverse_media.py
+│   ├── fixtures/                # offline sample data (so it runs without keys)
+│   ├── evals/run_evals.py       # offline check that signals are still correct
+│   └── tests/                   # scoring, sources, LLM retry, failure handling
+└── frontend/                    # Vite + React + TypeScript, single screen
+    └── src/{components,hooks,types,utils}
+```
+
+---
+
+## What it does & how to run it
+
+You enter a company name or Companies House number. The backend finds the matching company, runs three
+data sources at the same time, streams each result back as it finishes, and ends with a risk score,
+a band (low/medium/high), and two quality measures (confidence and completeness — explained later).
 
 ### Prerequisites
 
-- **Python 3.12+** and [`uv`](https://docs.astral.sh/uv/) (or plain `pip` + `venv` — see fallback below)
-- **Node 18+** and `npm`
-- **No API keys are required to run the demo.** `CH_USE_FIXTURES=true` (the default) serves
-  Companies House data from local fixtures, and the eval harness and tests stub the LLM. You only
-  need keys to hit the live Companies House API or to run live adverse-media classification.
+- **Python 3.12+** with [`uv`](https://docs.astral.sh/uv/) (or plain `pip` — see fallback)
+- **Node 18+** with `npm`
+- **No API keys needed for the demo.** By default the tool reads Companies House data from local
+  sample files, and the tests and eval harness use a fake LLM. You only need keys to call the real
+  Companies House API or run real adverse-media analysis.
 
-### Environment variables
+### Settings (environment variables)
 
-Copy `.env.example` to `.env` and fill in as needed. All config is read from env via `app/config.py`
-— nothing is hardcoded.
+Copy `.env.example` to `.env`. Everything is read from the environment via `app/config.py` — nothing
+is hardcoded.
 
-| Variable | Purpose | Default |
+| Variable | What it's for | Default |
 |---|---|---|
-| `CH_USE_FIXTURES` | `true` → serve Companies House from local fixtures (offline). `false` → call the live API. | `true` |
-| `CH_API_KEY` | Companies House API key (only needed when `CH_USE_FIXTURES=false`). HTTP Basic auth: key as username, blank password. | — |
-| `OPENROUTER_API_KEY` | OpenRouter key (prefix `sk-or-v1-`). Only needed for live adverse-media classification. | — |
-| `OPENROUTER_BASE_URL` | OpenRouter API base. | `https://openrouter.ai/api/v1` |
-| `LLM_MODEL` | OpenRouter `provider/model` slug. Must support structured outputs (`json_schema`). | `anthropic/claude-sonnet-4-5` |
+| `CH_USE_FIXTURES` | `true` = use local sample data (offline). `false` = call the real API. | `true` |
+| `CH_API_KEY` | Companies House key (only when `CH_USE_FIXTURES=false`). Sent as the username, blank password. | — |
+| `OPENROUTER_API_KEY` | OpenRouter key (`sk-or-v1-…`). Only for real adverse-media analysis. | — |
+| `OPENROUTER_BASE_URL` | OpenRouter API address. | `https://openrouter.ai/api/v1` |
+| `LLM_MODEL` | Which model to use (must support strict JSON output). | `anthropic/claude-sonnet-4-5` |
 
 ### Backend
 
 ```bash
 cd backend
-uv sync                                          # installs deps into .venv
+uv sync
 uv run uvicorn app.main:app --reload --port 8000
 ```
 
 <details>
-<summary>pip / venv fallback (if you don't have <code>uv</code>)</summary>
+<summary>No <code>uv</code>? Use pip instead</summary>
 
 ```bash
 cd backend
 python3 -m venv .venv
-.venv/bin/pip install -e .            # or: .venv/bin/pip install fastapi "uvicorn[standard]" httpx pydantic openai python-dotenv sse-starlette
-.venv/bin/pip install pytest pytest-asyncio respx   # dev deps for tests
+.venv/bin/pip install fastapi "uvicorn[standard]" httpx pydantic openai python-dotenv sse-starlette
+.venv/bin/pip install pytest pytest-asyncio respx   # for the tests
 .venv/bin/uvicorn app.main:app --reload --port 8000
 ```
 </details>
@@ -62,28 +90,24 @@ python3 -m venv .venv
 ```bash
 cd frontend
 npm install
-npm run dev          # http://localhost:5173 (proxies /assess → http://localhost:8000)
+npm run dev          # http://localhost:5173 (forwards /assess to port 8000)
 ```
 
 Open http://localhost:5173 and try:
-- `06789012` — overdue accounts (medium risk)
-- `14999001` — recently incorporated + mule-network director + FCA warning (high risk)
-- `LTD` — triggers the **disambiguation** flow (matches all fixture companies)
-- `ZZZNOMATCH` — the **no-match** empty state
 
-### Run the tests (single command)
+- `06789012` — overdue paperwork (medium risk)
+- `14999001` — brand new + mule-pattern director + FCA warning (high risk)
+- `LTD` — matches several companies, so you get the **"which one?"** picker
+- `ZZZNOMATCH` — the **no results** state
 
-```bash
-cd backend && uv run pytest        # or: .venv/bin/pytest
-```
-
-### Run the eval harness (single command, no API key needed)
+### Tests and the eval harness (one command each)
 
 ```bash
-cd backend && uv run python evals/run_evals.py     # or: .venv/bin/python evals/run_evals.py
+cd backend && uv run pytest                    # or: .venv/bin/pytest
+cd backend && uv run python evals/run_evals.py # or: .venv/bin/python evals/run_evals.py
 ```
 
-### Try the stream directly
+### Call the stream directly
 
 ```bash
 curl -N -X POST http://localhost:8000/assess \
@@ -93,14 +117,12 @@ curl -N -X POST http://localhost:8000/assess \
 
 ---
 
-## 2. Architecture
+## Architecture
 
-The guiding thesis: **this is a fan-out aggregation problem with an unreliable last mile.** The
-architecture is a set of independent, individually-degradable data sources that stream into a
-normalised risk model. The LLM is used surgically — only for fuzzy entity resolution and for turning
-unstructured adverse-media text into structured signals — and is fenced off everywhere else with
-schemas, timeouts, determinism controls, and validation-and-retry. **The risk score is fully
-deterministic and never depends on LLM randomness.**
+The core idea: **gather data from many sources, where the last step (fetching) is unreliable.** Each
+source is independent and can fail on its own without taking down the rest. The LLM is used in just
+one narrow place — turning messy news text into structured findings — and is boxed in with strict
+schemas, timeouts, and retries. **The risk score is plain code and never depends on the LLM.**
 
 ```
 React UI (Vite+TS)  --POST /assess (SSE stream)-->  FastAPI Orchestrator
@@ -114,188 +136,193 @@ React UI (Vite+TS)  --POST /assess (SSE stream)-->  FastAPI Orchestrator
           - AdverseMediaSource    (MOCKED retrieval, REAL LLM structuring)
 ```
 
-### The `DataSource` abstraction
+**The `DataSource` base class.** Every source has one method, `fetch()`. They all inherit
+`safe_fetch()`, which runs `fetch()` with a time limit and catches every error: a slow source returns
+`status="timeout"`, a broken one returns `status="error"`. **`safe_fetch` never throws.** Because the
+orchestrator only ever calls `safe_fetch`, one bad source can't crash the run — it just shows up as a
+failed card. Adding a new source is one class plus one line in the registry.
 
-Every source implements one method, `fetch(entity) -> SourceResult`, and inherits `safe_fetch()`,
-which wraps `fetch()` in `asyncio.wait_for(timeout_s)` plus a try/except. On timeout it returns
-`status="timeout"`; on any exception, `status="error"`. **`safe_fetch` never raises** — this is where
-the flaky-last-mile robustness lives. The orchestrator only ever calls `safe_fetch`, so one bad
-source can never crash the run; it just becomes an error card.
+**The shared data shape.** Each source produces zero or more `RiskSignal`s. Every signal records what
+it found (`code`), how serious it is (`severity`), its points (`score_contribution`), a plain-English
+`explanation`, which source it came from, and the raw `evidence` behind it. Keeping the evidence
+matters: this is a fraud tool, so every number must be traceable.
 
-Adding a source is **one new class + one registry entry** in `orchestrator._SOURCES`. That is the
-entire extensibility story.
-
-### Normalised risk model
-
-Each source emits zero or more `RiskSignal`s. Every signal carries `code`, `severity`,
-`score_contribution`, a human-readable `explanation`, its `source` (provenance), and an `evidence`
-dict with the raw supporting data. Auditability is a feature, not a nicety — this is a fraud product.
-The deterministic scorer sums weighted contributions into a single 0–100 score and band.
-
-### Streaming
-
-`POST /assess` returns `text/event-stream`. The orchestrator is an async generator that yields typed
-events: `entity_resolved` → `source_result` (one per source, as each lands via
-`asyncio.wait(FIRST_COMPLETED)`) → `final`. If a name matches several companies and no registration
-number was given, it yields `needs_disambiguation` and stops; if nothing matches, `error`.
+**Streaming.** `POST /assess` returns a live event stream. The orchestrator sends: `entity_resolved`
+(which company we're checking) → one `source_result` per source as it finishes → `final` (the full
+assessment). If a name matches several companies it sends `needs_disambiguation` and stops; if nothing
+matches, `error`.
 
 ---
 
-## 3. Key design decisions (with trade-offs)
+## Scoring
 
-**The LLM is fenced to two narrow jobs; the score is deterministic and LLM-free.**
-The LLM only does (a) entity-disambiguation tie-breaking and (b) adverse-media structuring. The risk
-score is a pure weighted sum of signal contributions in `scoring.py` — no model output feeds it.
-*Why:* a fraud score must be auditable, reproducible, and explainable to a regulator; LLM randomness
-must never move it. *Trade-off:* the system can't "learn" new risk patterns without a code change to
-the weights or signal logic — but that's the right trade for a compliance product.
+The score is **plain arithmetic, fully deterministic** — same inputs always give the same score, and
+the LLM never touches it. It lives in `scoring.py`.
 
-**Schema-forced structured output + validate-and-retry.**
-The adverse-media call uses OpenRouter's `response_format={"type":"json_schema", …, "strict":true}`,
-and the schema is generated *from* the Pydantic model via `model_json_schema()` so the wire contract
-and the validator can never drift. The returned JSON is fence-stripped, parsed, and validated against
-the model; on failure we re-prompt **once** with the validation error appended, then fail closed to a
-`status="error"` SourceResult. Every call has `temperature=0` and a `max_tokens` cap.
-*Trade-off:* one extra round-trip on a malformed response, and `strict` schemas constrain prompt
-phrasing — both worth it for reliability.
+Each signal carries a `score_contribution` (0–100) set by the source that raised it. The scorer
+multiplies each contribution by a per-signal **weight**, adds them up, and caps the total at 100:
 
-**Prompt versioning via files + an eval harness.**
-Prompts live in `app/llm/prompts/adverse_media_v1.txt` (system) and `…_user_v1.txt` (user template),
-loaded by version string, and the version is stamped into every assessment's `prompt_version`. The
-eval harness (`evals/run_evals.py`) is the concrete answer to "how do you know a prompt change helped
-or hurt": run it before and after a change and diff the coverage table. *Trade-off:* the offline
-harness stubs the LLM for determinism, so you collect live verdicts separately and bake them into the
-stub set when bumping a version — a deliberate split between "did signal extraction regress" (offline,
-fast) and "did the model's judgement change" (live, on demand).
+```
+score = min(100, Σ (signal.score_contribution × weight[signal.code]))
+```
 
-**Confidence vs completeness — two distinct numbers, deliberately.**
-- **Confidence** = source *health*: how many sources returned `ok` vs `error`/`timeout`. It answers
-  *"can we trust this result?"*
-- **Completeness** = data *coverage*: how many expected fields were actually populated with non-empty
-  data across all sources. It answers *"how thoroughly was this company profiled?"*
+The weights (in `SIGNAL_WEIGHTS`, tunable in one place):
 
-These must not collapse into one number. "Low risk" and "we couldn't gather enough to tell" are
-different outcomes, and a fraud analyst needs to see which they're looking at. A healthy company with
-one director, sparse filings, and no media coverage yields **high confidence, low completeness** — the
-06789012 example below shows exactly this (`confidence: 1.0`, `completeness: 0.67`). A single blended
-score would hide that distinction and mislead.
+| Signal | Weight |
+|---|---|
+| `DISSOLVED_OR_LIQUIDATION` | 1.2 |
+| `ADVERSE_MEDIA_MENTION` | 1.1 |
+| `RECENTLY_INCORPORATED` | 1.0 |
+| `DIRECTOR_MULTIPLE_APPOINTMENTS` | 0.9 |
+| `SPARSE_FILING_HISTORY` | 0.8 |
+| `OVERDUE_ACCOUNTS` | 0.7 |
 
-**Lightweight declared-field completeness.**
-Completeness uses a small declared table (`_SOURCE_EXPECTED_FIELDS` in `scoring.py`) mapping each
-source to the raw-dict keys it should populate, and counts how many are non-empty. *Trade-off:* it's a
-hand-maintained list rather than schema introspection. A fuller version would derive expected fields
-from each source's output Pydantic model (or a per-source "expected coverage" descriptor) so the two
-can't drift — but for a prototype the explicit table is more readable and obviously correct.
+(Any unlisted signal defaults to weight 1.0.) The final score maps to a **band**:
 
-**`CH_USE_FIXTURES` for offline development.**
-A single env flag swaps the *retrieval* step between local fixtures and the live API; the parsing,
-signal-generation, and scoring logic is **identical on both paths** — only the two private
-`_load_*`/`_fetch_*` methods differ. *Why:* the exercise must run and be testable without a key, and
-the fixtures double as the offline test corpus (recorded to mirror the real CH Public Data API
-schemas). *Trade-off:* fixtures can stage-drift from the real API, mitigated by modelling them on the
-documented response shapes and recording real responses where possible.
+| Score | Band |
+|---|---|
+| below 30 | low |
+| 30 to under 65 | medium |
+| 65 and above | high |
 
-**SSE over WebSockets.**
-The interaction is strictly one-directional server-push for the duration of an assessment, so
-Server-Sent Events fit exactly: simpler than WebSockets, work over plain HTTP, no extra protocol.
-*Trade-off:* no client→server channel mid-stream (not needed here) and a browser
-6-connections-per-host limit (irrelevant for one assessment at a time). One wrinkle: `EventSource` is
-GET-only, so the client uses `fetch` + a `ReadableStream` reader to POST and parse the stream itself —
-which also trades away `EventSource`'s native auto-reconnect (an assessment is a one-shot stream, so
-this doesn't matter here).
+No signals at all → score 0, band low.
+
+**Worked example (06789012):** overdue accounts (contribution 35 × weight 0.7 = 24.5) plus sparse
+filings (20 × 0.8 = 16.0) = **40.5**, which lands in the **medium** band. This matches the example
+output at the end of this README.
+
+Keeping scoring deterministic and code-based is deliberate: a fraud score has to be auditable and
+explainable to a regulator, and reproducible on demand. The cost is that it can't "learn" new patterns
+on its own — changing the logic means editing the weights or signal rules — which is the right trade
+for a compliance tool.
 
 ---
 
-## 4. Product decisions & assumptions flagged
+## Key design decisions (and their trade-offs)
 
-These are judgement calls made during the build that a reviewer should be able to challenge:
+**The LLM does one job; the score is LLM-free.** The only place the LLM runs is reading adverse-media
+text into a structured finding. The score is computed separately in plain code. *Trade-off:* no
+automatic learning, but full auditability and reproducibility. (Entity-disambiguation tie-breaking was
+also planned as an LLM job; today that's handled by asking the user instead — see assumptions.)
 
-- **Unknown-age companies and the filing-history check.** A Charitable Incorporated Organisation
-  (fixture `00000042`) can have a missing/empty `date_of_creation`. The age-based
-  `RECENTLY_INCORPORATED` check correctly emits nothing. But the sparse-filing check, lacking an age to
-  reason about, currently *does* fire `SPARSE_FILING_HISTORY` for it. Assumption: a company we can't age
-  and that has filed nothing is genuinely worth flagging. If the product decision is "suppress
-  filing-history checks when age is unknown", that's a one-line guard.
+**Strict JSON output + retry-once.** The adverse-media call forces the model to return JSON matching a
+fixed schema, and that schema is generated *from* the Pydantic model so the two can never drift. The
+reply is cleaned of stray markdown, parsed, and validated. If it fails, we ask again **once** with the
+error attached; if it fails again, that source returns `status="error"`. Every call uses
+`temperature=0` and a token cap. *Trade-off:* one extra request on a bad reply — worth it for
+reliability.
 
-- **Sparse-filing threshold for mature companies.** `SPARSE_FILING_HISTORY` fires when a company older
-  than 12 months has fewer than 3 filings in the trailing year. The 12-month suppression avoids
-  penalising brand-new companies (which legitimately haven't filed yet). The "3 in 12 months" bar is a
-  reasonable-looking default, not a calibrated one — it should be tuned against labelled data.
+**Versioned prompts + an eval harness.** Prompts are text files named by version
+(`adverse_media_v1.txt`), and the version is recorded on every assessment. To know whether a prompt
+edit helped, run `evals/run_evals.py` before and after and compare. *Trade-off:* the harness uses a
+fake LLM for repeatable results, so real model judgement is checked separately and then baked into the
+harness when a version is bumped.
 
-- **A dissolved company does not implicitly resign its officers.** When counting a director's active
-  appointments, an appointment with no `resigned_on` counts as active **even if the appointed-to
-  company has since been dissolved** — the API returns no server-side filter and dissolution doesn't
-  auto-resign officers. This is deliberate: a director racking up appointments at companies that later
-  dissolve is exactly the mule-network pattern we want to catch, not hide.
+**Confidence and completeness are two separate numbers — on purpose.**
 
-- **Disambiguation requires a registration number to proceed.** When a name matches several companies,
-  we stop and ask rather than guessing. Selecting a candidate re-submits by registration number — the
-  unambiguous path. Assumption: a wrong auto-pick in a fraud product is worse than one extra click.
+- **Confidence** = how many sources worked (returned `ok` vs failed). Answers *"can we trust this?"*
+- **Completeness** = how many expected data fields actually came back filled. Answers *"how much did we
+  actually find out?"*
 
----
+These are not the same. "Low risk" and "we couldn't find enough to judge" are different answers, and an
+analyst must be able to tell them apart. A healthy company with one director, few filings, and no news
+gives **high confidence but low completeness** — see the 06789012 example (`confidence 1.0`,
+`completeness 0.67`). Merging them into one number would hide that.
 
-## 5. Answers to the brief's "questions for consideration"
+**Completeness uses a simple declared list.** `scoring.py` keeps a small table of which fields each
+source should fill, and counts how many are non-empty. *Trade-off:* it's hand-maintained. A fuller
+version would derive the expected fields from each source's data model so they can't fall out of sync —
+but for a prototype the explicit list is clearer.
 
-**Progressive results & knowing when results are final.** Each source streams its card the moment it
-lands (`asyncio.wait(FIRST_COMPLETED)`), so the fast Companies House profile appears in ~1s while the
-slower adverse-media/LLM path trickles in. While running, the UI shows a `"2 of 3 sources complete"`
-counter and per-card pending spinners. When the `final` event arrives, the UI flips to an
-unmistakable green **"Assessment complete"** banner with the score, band, confidence, and
-completeness. The user is never left guessing whether more is coming.
+**One flag swaps fixtures for the live API.** `CH_USE_FIXTURES` switches only the *fetching* step;
+the parsing, signal logic, and scoring are identical either way. *Why:* it must run and be testable
+without keys, and the sample files double as the offline test data (shaped to match the real API).
+*Trade-off:* samples can drift from the real API over time.
 
-**What happens when a source is slow.** Each source has a hard per-source timeout (`timeout_s`), so
-total wall-clock is bounded by the *slowest single source*, not the sum. A source that exceeds its
-budget degrades to a `timeout` card; one that errors degrades to an `error` card — visually distinct
-from a source that succeeded but found nothing ("No risk signals found", green). The assessment always
-completes. Confidence drops to reflect the degraded source health.
-
-**Company-name ambiguity UX.** This is the "Tunic Pay → Tunic & Co UK Limited" problem. Three states,
-each visually distinct from a loading spinner:
-- **Multi-match** → a `DisambiguationList` showing each candidate's name, registration number, status
-  badge, and address so the user can tell them apart; selecting one re-runs by registration number.
-- **No match** → a neutral, calm "No company found" panel (not an alarming error), suggesting a
-  registration-number search.
-- **Single / exact match** → resolves straight through, no interruption.
-
-**Prompt versioning & knowing if a change helped.** Versioned prompt files + `prompt_version` stamped
-on every assessment + the eval harness. Run `evals/run_evals.py` before and after a prompt edit and
-compare the per-case pass/fail and coverage summary. The harness deliberately includes the two hard
-adverse-media cases — the **victim** story and the **same-name decoy** — which must both resolve to
-`NOT_ADVERSE`; a prompt change that breaks either shows up immediately.
-
-**Scaling to ~1000 queries/minute.** Stateless FastAPI workers behind a load balancer. `POST /assess`
-returns a **job-id** immediately; the slow LLM and upstream source calls move onto a **queue**, with
-results pushed back to the client (WebSocket / SSE channel keyed by job-id) as they complete. **Cache**
-by `(company_number, source, prompt_version)` in Redis with **per-source TTLs** (e.g. CH profile 24h,
-director network 6h, adverse media 1h) — most of the load is repeat lookups of the same beneficiaries.
-**Rate-limit and circuit-break each upstream** independently (a token bucket per API, a breaker that
-sheds load to cached/degraded results when an upstream is failing) so one slow provider can't stall the
-fleet. **Batch LLM calls** across concurrent requests where the article set overlaps. The existing
-in-process LLM cache (keyed by `model:prompt_version:registration_number:article_text`) is the
-single-node version of this; Redis is the multi-node generalisation.
+**Server-Sent Events, not WebSockets.** The data only flows one way (server → browser) during an
+assessment, so SSE is the simpler fit — plain HTTP, no extra protocol. *Trade-off:* no mid-stream
+channel back to the server (not needed here). One quirk: the browser's built-in `EventSource` only
+does GET, so the client reads the POST stream manually — which gives up `EventSource`'s automatic
+reconnect, but an assessment is a one-shot stream so that doesn't matter.
 
 ---
 
-## 6. What I'd do differently with more time
+## Product assumptions worth challenging
 
-- **Real retrieval sources.** Swap mocked adverse-media retrieval for a live news API (GDELT, Dow
-  Jones, LexisNexis) and a sanctions/PEP list (OpenSanctions, OFAC/HMT). The seam is already clean —
-  it's one private method per source.
-- **PSC / beneficial-ownership signals.** The Companies House PSC endpoint exposes hidden ownership
-  chains — a strong signal for shell-company and layering detection.
-- **Redis cache + job queue.** The 1000 QPM design above; the in-process cache is the prototype stub.
-- **A persistent, labelled eval dataset.** Grow `evals/` from 5 hand-built cases into a versioned
-  corpus of real companies with analyst-labelled expected signals, tracked over time, with precision/
-  recall per signal so prompt and scoring changes are measured, not guessed.
-- **OpenTelemetry tracing.** A span per source fetch, latency histograms per source, LLM token-usage
-  metrics — essential for spotting which upstream is the bottleneck under load.
-- **Richer entity resolution.** Today, name resolution is substring/exact matching (fixtures) or the CH
-  search ranking (live). A fuller version would use the LLM disambiguation seam already scaffolded:
-  address/postcode matching, SIC-code plausibility, and fuzzy scoring across candidates.
+- **Companies with no known age.** A charity body (sample `00000042`) can have no creation date. The
+  "recently incorporated" check correctly stays silent. But the "sparse filings" check still fires,
+  since it has no age to reason about. Assumption: a company we can't age and that has filed nothing is
+  worth flagging. Suppressing it instead is a one-line change.
+
+- **Sparse-filing threshold.** Fires when a company older than 12 months has fewer than 3 filings in
+  the last year. The 12-month grace avoids punishing genuinely new companies. "3 in 12 months" is a
+  sensible default, not a calibrated one — it should be tuned against real labelled data.
+
+- **A dissolved company doesn't auto-resign its directors.** When counting a director's active roles,
+  a role with no resignation date counts as active **even if that company has since dissolved** — the
+  API doesn't filter these out, and dissolution doesn't remove officers. This is intentional: a
+  director piling up roles at companies that later collapse is exactly the mule pattern we want to see.
+
+- **Ambiguous names ask the user.** When a name matches several companies, we stop and show a picker
+  rather than guessing; picking one re-runs by its number. Assumption: in a fraud tool, a wrong
+  auto-pick is worse than one extra click.
 
 ---
 
-## 7. Example input/output
+## Answers to the brief's questions
+
+**Live results, and knowing when they're final.** Each source's card appears the moment that source
+finishes, so the fast Companies House data shows in about a second while the slower news/LLM step
+trickles in. While running, the UI shows a "2 of 3 sources complete" counter and spinners. When the
+`final` event arrives, it switches to a clear green **"Assessment complete"** banner with the score,
+band, confidence, and completeness — so you always know if more is coming.
+
+**Slow sources.** Each source has its own time limit, so total time is bounded by the *slowest single
+source*, not the sum. A source over its limit becomes a `timeout` card; a broken one becomes an
+`error` card — visually different from a source that worked but found nothing ("No risk signals
+found", green). The assessment always finishes, and confidence drops to reflect the failures.
+
+**Ambiguous company names** (the "Tunic Pay → Tunic & Co UK Limited" problem). Three states, each
+clearly different from a loading spinner:
+- **Several matches** → a picker listing each candidate's name, number, status, and address; choosing
+  one re-runs by number.
+- **No match** → a calm "No company found" message (not a scary error) suggesting a number search.
+- **One clear match** → goes straight through.
+
+**Knowing if a prompt change helped.** Versioned prompt files, the version stamped on every result,
+and the eval harness. Run it before and after an edit and compare the pass/fail table. It includes the
+two hard cases on purpose — a fraud story where the company is the **victim**, and a **different
+company with the same name** — both of which must come back as "not adverse". If a prompt change breaks
+either, you see it immediately.
+
+**Handling ~1000 queries a minute.** Run many stateless copies of the backend behind a load balancer.
+`POST /assess` returns a job id straight away; the slow LLM and source calls go onto a queue, and
+results are pushed to the browser as they land. Cache results by
+`(company number, source, prompt version)` in Redis with a different expiry per source (e.g. company
+profile 24h, directors 6h, news 1h) — most traffic is repeat lookups of the same companies.
+Rate-limit and circuit-break each external API on its own, so one slow provider can't stall everything
+(falling back to cached or partial results). Batch LLM calls where requests share the same articles.
+The current in-memory LLM cache is the single-machine version of this idea; Redis is the multi-machine
+version.
+
+---
+
+## What I'd do with more time
+
+- **Real data sources.** Swap the mocked news retrieval for a live news API (GDELT, Dow Jones) and a
+  sanctions/PEP list (OpenSanctions, OFAC). The swap point is already isolated to one method per source.
+- **Ownership signals.** Use the Companies House "people with significant control" data to spot hidden
+  ownership chains — strong for shell-company detection.
+- **Redis cache + job queue.** The scaling design above; the in-memory cache is the stand-in.
+- **A real labelled test set.** Grow the eval harness from 5 hand-built cases into a tracked set of
+  real companies with analyst-checked answers, measuring precision/recall per signal over time.
+- **Tracing.** Per-source timing and LLM token usage, to see what's slow under load.
+- **Smarter name matching.** Today it's substring/exact (offline) or the API's own ranking (live). A
+  fuller version would add fuzzy matching, address/postcode checks, and the planned LLM tie-breaker.
+
+---
+
+## Example input/output
 
 **Input:**
 
@@ -303,7 +330,7 @@ single-node version of this; Redis is the multi-node generalisation.
 { "registration_number": "06789012" }
 ```
 
-**Output** (`final` event payload, `raw` blobs omitted for brevity):
+**Output** (`final` event, raw blobs trimmed):
 
 ```json
 {
@@ -356,36 +383,6 @@ single-node version of this; Redis is the multi-node generalisation.
 }
 ```
 
-Note `confidence: 1.0` (all three sources returned `ok`) alongside `completeness: 0.67` (4 of 6
-expected fields populated — no adverse-media articles, so that source's two expected fields are empty).
-This is the confidence-vs-completeness divergence working as intended: we fully trust the result, but
-we didn't have a full data picture to work from.
-
----
-
-## Project layout
-
-```
-├── README.md / .env.example
-├── backend/
-│   ├── app/
-│   │   ├── main.py              # FastAPI app, POST /assess SSE endpoint
-│   │   ├── models.py            # Pydantic contracts (the shared schema)
-│   │   ├── orchestrator.py      # entity resolution → fan-out → stream → score
-│   │   ├── scoring.py           # deterministic score + completeness (pure)
-│   │   ├── entity_resolution.py
-│   │   ├── config.py            # all env config
-│   │   ├── llm/
-│   │   │   ├── client.py        # OpenRouter wrapper: json_schema, retry, cache
-│   │   │   └── prompts/         # versioned prompt files
-│   │   └── sources/
-│   │       ├── base.py          # DataSource ABC + safe_fetch
-│   │       ├── companies_house.py
-│   │       ├── director_network.py
-│   │       └── adverse_media.py
-│   ├── fixtures/                # offline CH + adverse-media corpus
-│   ├── evals/run_evals.py       # offline regression harness
-│   └── tests/                   # scoring, sources (respx), LLM retry, degradation
-└── frontend/                    # Vite + React + TS single view
-    └── src/{components,hooks,types,utils}
-```
+Here **confidence is 1.0** (all three sources worked) but **completeness is 0.67** (4 of 6 expected
+fields filled — there were no news articles, so that source's two fields stayed empty). That's the
+point of keeping them separate: we fully trust the result, but we didn't have a complete picture.
